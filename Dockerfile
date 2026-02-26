@@ -9,8 +9,8 @@ COPY src/yfinance_wrapper ./yfinance_wrapper
 RUN pip install -r requirements.txt --user
 RUN pip install . --user
 
-LABEL "traefik.http.services.yfinance_wrapper.loadbalancer.server.port"=80
+LABEL "traefik.http.services.yfinance_wrapper.loadbalancer.server.port"=8000
 
-EXPOSE 80
+EXPOSE 8000
 
-ENTRYPOINT [ "python", "/app/yfinance_wrapper" ]
+ENTRYPOINT [ "python", "-m", "yfinance_wrapper" ]
