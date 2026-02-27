@@ -6,6 +6,7 @@ COPY requirements.txt .
 COPY src/setup.py .
 COPY src/yfinance_wrapper ./yfinance_wrapper
 
+ENV PATH="/root/.local/bin:$PATH"
 RUN pip install -r requirements.txt --user
 RUN pip install . --user
 RUN opentelemetry-bootstrap -a install
