@@ -20,3 +20,11 @@ run the project
 cd src
 python3 financeapp
 ```
+
+```bash
+docker build --platform linux/amd64 . -t registry.lucas.engineering/yfinance_wrapper:1.0
+```
+
+```bash
+docker push registry.lucas.engineering/yfinance_wrapper:1.0
+```
