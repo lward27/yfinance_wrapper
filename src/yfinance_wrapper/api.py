@@ -1,7 +1,7 @@
-from fastapi import Depends, FastAPI, Query, HTTPException
-from fastapi.responses import HTMLResponse
+from fastapi import FastAPI, HTTPException
 from fastapi.middleware.cors import CORSMiddleware
-from typing import List, Optional
+from typing import Optional
+from datetime import date
 
 import yfinance as yf
 
@@ -30,14 +30,21 @@ async def get_info(ticker_name: str):
     return tick.info
 
 @app.get("/history")
-async def get_history(ticker_name: str, period: str):
+async def get_history(
+    ticker_name: str,
+    period: Optional[str] = None,
+    start: Optional[date] = None,
+    end: Optional[date] = None,
+):
     tick = yf.Ticker(ticker_name)
     try:
-        hist = tick.history(period=period)
+        if start and end:
+            hist = tick.history(start=str(start), end=str(end))
+        else:
+            hist = tick.history(period=period or "max")
     except Exception:
         raise HTTPException(status_code=502, detail="Upstream error")
     if hist is None or hist.empty:
-        # TODO: Delete Ticker so next time it isn't included in this process
         raise HTTPException(status_code=404, detail="Ticker Not Found")
     return hist.to_dict()
 
