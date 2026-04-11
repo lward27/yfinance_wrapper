@@ -5,7 +5,7 @@ docker pull postgres
 ```
 
 ```bash
-docker run --name postgres-primary -p 5432:5432 -e POSTGRES_PASSWORD=topsecretpassword -d postgres
+docker run --name postgres-primary -p 5432:5432 -e POSTGRES_PASSWORD=change-me -d postgres
 ```
 
 ```bash
