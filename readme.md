@@ -28,3 +28,12 @@ docker build --platform linux/amd64 . -t registry.lucas.engineering/yfinance_wra
 ```bash
 docker push registry.lucas.engineering/yfinance_wrapper:1.0
 ```
+
+## Validation
+
+The wrapper includes a pure validation module (`yfinance_wrapper.validation`) that normalizes tickers and validates date ranges before calling upstream:
+
+- **Ticker normalization** strips whitespace, upper-cases the symbol, and rejects empty or overly long strings and invalid characters.
+- **Date-range validation** ensures `start` and `end` are provided together, that `start` is not after `end`, and that dates are not in the future (unless explicitly allowed).
+
+These functions have no side effects and are covered by standard-library unit tests under `tests/test_validation.py`.
