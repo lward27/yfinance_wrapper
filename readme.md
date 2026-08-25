@@ -37,3 +37,34 @@ The wrapper includes a pure validation module (`yfinance_wrapper.validation`) th
 - **Date-range validation** ensures `start` and `end` are provided together, that `start` is not after `end`, and that dates are not in the future (unless explicitly allowed).
 
 These functions have no side effects and are covered by standard-library unit tests under `tests/test_validation.py`.
+
+## History Endpoint (`/history`)
+
+The `/history` endpoint supports two mutually exclusive ways to request historical data:
+
+1. **By period** — pass a single `period` query parameter.
+2. **By explicit date range** — pass both `start` and `end` query parameters.
+
+Providing `period` together with `start`/`end` is a validation error.
+
+### Supported period values
+
+The following `period` values are accepted (case-insensitive):
+
+- `1d`, `5d`
+- `1mo`, `3mo`, `6mo`
+- `1y`, `2y`, `5y`, `10y`
+- `ytd`, `max`
+
+### Validation behavior
+
+All input validation at `/history` runs **before any upstream yfinance call** and returns a stable **HTTP 422** response with a JSON error body. The following inputs are rejected with 422:
+
+- **Invalid ticker** — empty, too long, or containing disallowed characters.
+- **Invalid period** — not one of the supported values listed above.
+- **Period/date conflict** — supplying both `period` and `start`/`end` together.
+- **Invalid date range** — missing one of `start`/`end`, `start` after `end`, or dates in the future.
+
+When any of these validation errors occurs, `yf.Ticker` is never instantiated.
+
+Endpoint validation is covered by async mock tests in `tests/test_history_endpoint_validation.py`.
