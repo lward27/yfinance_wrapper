@@ -5,20 +5,20 @@ dependency_lock:
   path: requirements.lock
   sha256: 0da04a0dfa60f6db1d952fe8753b8aa9fab3983fc719a784a7292f0030a9c445
 writable_paths:
-  - src/**
-  - tests/**
-  - readme.md
+- src/**
+- tests/**
+- readme.md
 acceptance_commands:
-  - name: unit-tests
-    command: python -m unittest discover -s tests -v
-  - name: compile-check
-    command: python -m compileall -q src tests
+- name: unit-tests
+  command: python -m unittest discover -s tests -v
+- name: compile-check
+  command: python -m compileall -q src tests
 roots:
   source:
-    - src
+  - src
   tests:
-    - tests
+  - tests
   documentation:
-    - readme.md
+  - readme.md
 agent_network: denied
 package_installation: preparation_only
