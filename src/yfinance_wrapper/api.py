@@ -10,6 +10,10 @@ from yfinance_wrapper.history_period_validator import (
     validate_history_period,
     HistoryPeriodError,
 )
+from yfinance_wrapper.market_validator import (
+    validate_market,
+    MarketValidationError,
+)
 
 app = FastAPI()
 
@@ -99,3 +103,26 @@ async def get_history(
     if hist is None or hist.empty:
         raise HTTPException(status_code=404, detail="Ticker Not Found")
     return hist.to_dict()
+
+
+@app.get("/markets/{market_name}")
+async def get_market(market_name: str):
+    # 1. Validate market name before any upstream call
+    try:
+        canonical = validate_market(market_name)
+    except MarketValidationError as exc:
+        raise _validation_error_response(str(exc))
+
+    # 2. Only after validation passes, construct the upstream Market
+    try:
+        market = yf.Market(canonical)
+        summary = market.summary
+        status = market.status
+    except Exception:
+        raise HTTPException(status_code=502, detail="Upstream error")
+
+    return {
+        "market": canonical,
+        "summary": summary,
+        "status": status,
+    }
