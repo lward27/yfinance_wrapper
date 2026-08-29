@@ -68,3 +68,48 @@ All input validation at `/history` runs **before any upstream yfinance call** an
 When any of these validation errors occurs, `yf.Ticker` is never instantiated.
 
 Endpoint validation is covered by async mock tests in `tests/test_history_endpoint_validation.py`.
+
+## Market Endpoint (`/markets/{market_name}`)
+
+The `/markets/{market_name}` endpoint returns a summary and status for a supported yfinance Market.
+
+### Request
+
+- **Path parameter** `market_name` (string, required) — the market identifier.
+
+### Supported market values
+
+The following market values are accepted (case-insensitive):
+
+- `US`, `GB`
+- `ASIA`, `EUROPE`
+- `RATES`
+- `COMMODITIES`
+- `CURRENCIES`
+- `CRYPTOCURRENCIES`
+
+### Response envelope
+
+On success the endpoint returns **HTTP 200** with a stable JSON envelope:
+
+```json
+{
+  "market": "US",
+  "summary": { ... },
+  "status": { ... }
+}
+```
+
+- `market` — the canonical upper-case market key.
+- `summary` — the upstream `yf.Market.summary` object.
+- `status` — the upstream `yf.Market.status` object.  For non-US markets this field may be `null`, which is preserved as documented yfinance behavior.
+
+### Error contracts
+
+- **HTTP 422** — returned when `market_name` is missing, empty, or not one of the supported values listed above.  `yf.Market` is **never** instantiated for invalid names.
+- **HTTP 502** — returned when an upstream exception occurs while calling `yf.Market`.  The response body contains a generic error message and leaks no internal details.
+
+### Test coverage
+
+- Pure validator logic is covered by `tests/test_market_validator.py`.
+- Endpoint behavior (including 422/502 responses and null-status handling) is covered by async mock tests in `tests/test_market_endpoint.py`.
