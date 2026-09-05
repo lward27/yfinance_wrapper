@@ -3,7 +3,7 @@ environment_profile: python-3.11
 dependency_lock:
   kind: pip_requirements
   path: requirements.lock
-  sha256: 0da04a0dfa60f6db1d952fe8753b8aa9fab3983fc719a784a7292f0030a9c445
+  sha256: 9ddd03e2b5d463d35e4007fa1d3f67e635f291cf61d4e4bbffe4d7b3b9317f09
 writable_paths:
 - src/**
 - tests/**
