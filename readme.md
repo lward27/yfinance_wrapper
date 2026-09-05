@@ -1,33 +1,34 @@
-# Yahoo Finance API Consumer
+# Yahoo Finance API wrapper
 
-create venv
-```bash
-python3 -m venv venv
-source venv/bin/activate
-python3 -m pip install -r requirements.txt
+Use Python 3.11 and the committed, hashed dependency lock. The lock includes the
+explicit OpenTelemetry instrumentation set used in production; image builds no
+longer run dependency discovery or install the application through an unbounded
+packaging step.
+
+```sh
+python3.11 -m venv .venv
+. .venv/bin/activate
+python -m pip install --require-hashes --only-binary=:all: -r requirements.lock
+PYTHONPATH=src python -m unittest discover -s tests -v
+python -m compileall -q src tests
+PYTHONPATH=src opentelemetry-instrument python -m yfinance_wrapper
 ```
 
-install local project in editable mode
-```bash
-cd src
-python3 -m pip install -e .
+The Dockerfile uses the same pinned Python base as PHarness's Python 3.11 runner,
+executes the existing unit/compile checks, and copies the verified application into
+the runtime image. It requires a full source commit for the OCI revision label.
+For a local validation build from a clean committed checkout:
+
+```sh
+docker --context rancher-desktop buildx build --builder rancher-desktop \
+  --platform linux/amd64 --build-arg SOURCE_COMMIT="$(git rev-parse HEAD)" \
+  --load -t yfinance-wrapper:validation .
 ```
 
-setup db (see `db_setup.md`)
-
-run the project
-```bash
-cd src
-python3 financeapp
-```
-
-```bash
-docker build --platform linux/amd64 . -t registry.lucas.engineering/yfinance_wrapper:1.0
-```
-
-```bash
-docker push registry.lucas.engineering/yfinance_wrapper:1.0
-```
+Releases use `pharness-yfinance-build` in `lucas_engineering`, then promote the
+resulting image digest through staging and a separately approved production GitOps
+change. Building an image does not deploy it. PHarness's autonomous Finance
+acceptance is still pending; this packaging correction is a prerequisite.
 
 ## Validation
 
