@@ -1,0 +1,31 @@
+name: Source integrity
+
+'on':
+  pull_request:
+    branches: [main]
+  push:
+    branches: [main]
+
+permissions:
+  contents: read
+
+concurrency:
+  group: source-integrity-${{ github.ref }}
+  cancel-in-progress: true
+
+jobs:
+  source-integrity:
+    name: Source integrity
+    runs-on: ubuntu-24.04
+    timeout-minutes: 60
+    steps:
+      - uses: actions/checkout@3d3c42e5aac5ba805825da76410c181273ba90b1 # v7.0.1
+        with:
+          persist-credentials: false
+      - name: Test the exact proposed tree with the release Dockerfile
+        shell: bash
+        run: |
+          set -euo pipefail
+          source_revision=$(git rev-parse HEAD)
+          docker build --platform linux/amd64 --pull \
+            --build-arg "SOURCE_COMMIT=$source_revision" .
