@@ -70,6 +70,37 @@ When any of these validation errors occurs, `yf.Ticker` is never instantiated.
 
 Endpoint validation is covered by async mock tests in `tests/test_history_endpoint_validation.py`.
 
+## Full-history export (`GET /history/full?ticker_name=AAPL`)
+
+This additive endpoint is for the slow corporate-action backfill. Ordinary
+`/history` responses and defaults are unchanged.
+
+It fetches one full daily history with explicit `auto_adjust=False`,
+`back_adjust=False`, `actions=True`, `repair=False`, `keepna=True`, and
+`raise_errors=True`. The envelope includes schema version, normalized ticker,
+source/library version, UTC retrieval time, exchange timezone, and sorted rows.
+Each row retains OHLC, adjusted close, volume, dividend, split ratio, and optional
+capital-gain distribution. Financial values use decimal strings; missing prices
+remain null. Missing required action columns fail rather than silently losing
+events.
+
+The price/dividend basis is labeled `yahoo_split_adjusted`, **not as-traded**.
+Disabling automatic adjustment does not undo Yahoo's historical split basis.
+Consumers must validate/reconstruct that basis before applying corporate actions.
+This endpoint does not provide payment dates, point-in-time borrow availability,
+exchange-calendar certification, or complete delisting data.
+
+One full export is admitted per minute per wrapper process. Requests during the
+cooldown return 429 with `Retry-After`; an upstream Yahoo rate limit extends the
+cooldown to at least 15 minutes and is also returned as 429, not a generic 502.
+Missing prices/timezone upstream errors return 404; other upstream failures return
+a sanitized 502. Invalid tickers fail before reserving a request.
+
+The backfill worker must also enforce its durable singleton/global cooldown.
+This process-local safeguard is not a distributed quota for other replicas or
+ordinary exploration/scraper traffic. Yahoo may make internal metadata/auth calls,
+so one history call is not a guaranteed single Yahoo HTTP request.
+
 ## Market Endpoint (`/markets/{market_name}`)
 
 The `/markets/{market_name}` endpoint returns a summary and status for a supported yfinance Market.

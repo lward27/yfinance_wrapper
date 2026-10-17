@@ -4,6 +4,7 @@ from typing import Optional
 from datetime import date
 
 import yfinance as yf
+from yfinance_wrapper.full_history import router as full_history_router
 
 from yfinance_wrapper.validation import normalize_ticker, validate_date_range
 from yfinance_wrapper.history_period_validator import (
@@ -16,6 +17,7 @@ from yfinance_wrapper.market_validator import (
 )
 
 app = FastAPI()
+app.include_router(full_history_router)
 
 # CORS middleware for frontend access
 app.add_middleware(
