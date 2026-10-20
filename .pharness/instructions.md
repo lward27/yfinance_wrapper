@@ -1,10 +1,9 @@
-# PHarness repository guidance
+Repository: Python 3.11 FastAPI wrapper around yfinance (github.com/lward27/yfinance_wrapper.git @ 772179fe).
 
-This repository is a Python 3.11 FastAPI wrapper around `yfinance`.
+Discovered facts: source root src (package src/yfinance_wrapper), test root tests (stdlib unittest suites), documentation root readme.md. Dependency lock requirements.lock (pip_requirements, sha256 9ddd03e2b5d463d35e4007fa1d3f67e635f291cf61d4e4bbffe4d7b3b9317f09) pins every entry with == versions and --hash=sha256 entries; no file:, link:, git, or URL dependencies were found, so it backs the contract. Environment profile python-3.11 (accepted lock kind pip_requirements) is copied exactly from the compatible profile descriptor. Acceptance commands are copied verbatim from readme.md: 'PYTHONPATH=src python -m unittest discover -s tests -v' and 'python -m compileall -q src tests'.
 
-- Treat the environment snapshot and `.pharness/repository.yaml` as authoritative. Do not probe for Python, Docker, package managers, internet access, or operating-system details.
-- Keep application code under `src/yfinance_wrapper`, standard-library unit tests under `tests`, and usage documentation in `readme.md`.
-- Preserve the existing FastAPI response shapes unless the WorkItem explicitly changes their contract.
-- Prefer pure validation functions that can be tested without network access or live market data.
-- Run only the named acceptance commands through PHarness's typed acceptance-command tool.
-- Inspect Git status and the final diff after the last source change before reporting completion.
+Scope distinction: this onboarding Run may change only .pharness/repository.yaml and .pharness/instructions.md (and remove .pharness/project.yaml) per allowed_source_changes; the candidate_contract.writable_paths (src/**, tests/**, readme.md) propose the scope for future development WorkItems and do not authorize edits in this Run. Manifests, lockfiles (requirements.txt, requirements.lock), Dockerfile, deployment.yaml, and .pharness/** are outside the future writable scope.
+
+Guidance for future WorkItems: keep application code under src/yfinance_wrapper, standard-library unit tests under tests, and usage docs in readme.md. Preserve existing FastAPI response shapes unless a WorkItem explicitly changes their contract. Prefer pure validation functions testable without network access or live market data. Agent network access is denied; run only the named acceptance commands. Inspect Git status and the final diff after the last source change before reporting completion.
+
+Product model: this Repository is already bound to the existing Service market-data-api (Market Data API, svc_01a0436ac3b670a1a29454c7ae75f475) with source scope over the whole repository; no new Service is created and no binding change is proposed.
