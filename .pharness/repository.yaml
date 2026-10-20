@@ -9,9 +9,9 @@ writable_paths:
 - tests/**
 - readme.md
 acceptance_commands:
-- name: unit-tests
-  command: python -m unittest discover -s tests -v
-- name: compile-check
+- name: unit_tests
+  command: PYTHONPATH=src python -m unittest discover -s tests -v
+- name: compile_check
   command: python -m compileall -q src tests
 roots:
   source:
