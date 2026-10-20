@@ -49,8 +49,17 @@ async def get_info(ticker_name: str):
         normalized = normalize_ticker(ticker_name)
     except ValueError as exc:
         raise _validation_error_response(str(exc))
-    tick = yf.Ticker(normalized)
-    return tick.info
+    try:
+        tick = yf.Ticker(normalized)
+        info = tick.info
+    except Exception:
+        raise HTTPException(status_code=502, detail="Upstream error")
+    if not info or not any(
+        key in info
+        for key in ("symbol", "shortName", "longName", "regularMarketPrice")
+    ):
+        raise HTTPException(status_code=404, detail="Ticker Not Found")
+    return info
 
 
 @app.get("/history")
