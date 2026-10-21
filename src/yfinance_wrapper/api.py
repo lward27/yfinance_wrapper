@@ -103,8 +103,8 @@ async def get_history(
         validated_end = None
 
     # 4. Only after all validation passes, construct the upstream ticker
-    tick = yf.Ticker(normalized)
     try:
+        tick = yf.Ticker(normalized)
         if validated_start is not None and validated_end is not None:
             hist = tick.history(start=str(validated_start), end=str(validated_end))
         else:
