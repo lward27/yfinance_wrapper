@@ -41,20 +41,28 @@ async def read_root():
     return {"Hello": "World"}
 
 
-@app.get("/healthz")
-async def healthz():
+def _version_build_info() -> dict:
     try:
         app_version = version("yfinance_wrapper")
     except PackageNotFoundError:
         app_version = "unknown"
     return {
-        "status": "ok",
         "version": app_version,
         "build": {
             "revision": os.environ.get("YFINANCE_WRAPPER_BUILD_REVISION") or "unknown",
             "image_digest": os.environ.get("YFINANCE_WRAPPER_IMAGE_DIGEST") or "unknown",
         },
     }
+
+
+@app.get("/healthz")
+async def healthz():
+    return {"status": "ok", **_version_build_info()}
+
+
+@app.get("/version")
+async def version_info():
+    return _version_build_info()
 
 
 @app.get("/info")
