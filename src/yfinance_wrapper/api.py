@@ -1,3 +1,6 @@
+import os
+from importlib.metadata import PackageNotFoundError, version
+
 from fastapi import FastAPI, HTTPException
 from fastapi.middleware.cors import CORSMiddleware
 from typing import Optional
@@ -40,7 +43,18 @@ async def read_root():
 
 @app.get("/healthz")
 async def healthz():
-    return {"status": "ok"}
+    try:
+        app_version = version("yfinance_wrapper")
+    except PackageNotFoundError:
+        app_version = "unknown"
+    return {
+        "status": "ok",
+        "version": app_version,
+        "build": {
+            "revision": os.environ.get("YFINANCE_WRAPPER_BUILD_REVISION") or "unknown",
+            "image_digest": os.environ.get("YFINANCE_WRAPPER_IMAGE_DIGEST") or "unknown",
+        },
+    }
 
 
 @app.get("/info")
