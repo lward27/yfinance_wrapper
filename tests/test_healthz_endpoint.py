@@ -62,6 +62,17 @@ class TestHealthzEndpoint(unittest.IsolatedAsyncioTestCase):
         self.assertEqual(result["build"]["revision"], "unknown")
         self.assertEqual(result["build"]["image_digest"], "unknown")
 
+    async def test_build_fields_unknown_when_empty(self):
+        env = {
+            "YFINANCE_WRAPPER_BUILD_REVISION": "",
+            "YFINANCE_WRAPPER_IMAGE_DIGEST": "",
+        }
+        with patch.dict(os.environ, env):
+            result = await healthz()
+
+        self.assertEqual(result["build"]["revision"], "unknown")
+        self.assertEqual(result["build"]["image_digest"], "unknown")
+
 
 if __name__ == "__main__":
     unittest.main()
