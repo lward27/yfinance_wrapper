@@ -45,7 +45,8 @@ def validate_date_range(
     Rules:
     - Both start and end must be provided together (or both omitted).
     - start must not be after end.
-    - By default, neither date may be in the future.
+    - By default, start may not be in the future and end may be at most
+      tomorrow, because end is exclusive upstream (end=tomorrow includes today).
 
     Returns:
         A (start, end) tuple.
@@ -71,7 +72,7 @@ def validate_date_range(
         today = date.today()
         if start > today:
             raise ValueError("Start date cannot be in the future")
-        if end > today:
-            raise ValueError("End date cannot be in the future")
+        if end > today + timedelta(days=1):
+            raise ValueError("End date cannot be more than one day in the future")
 
     return (start, end)

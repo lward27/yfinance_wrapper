@@ -2,9 +2,10 @@ import os
 from importlib.metadata import PackageNotFoundError, version
 
 from fastapi import FastAPI, HTTPException
+from fastapi.encoders import jsonable_encoder
 from fastapi.middleware.cors import CORSMiddleware
 from typing import Optional
-from datetime import date
+from datetime import date, tzinfo
 
 import yfinance as yf
 from yfinance_wrapper.full_history import router as full_history_router
@@ -154,8 +155,12 @@ async def get_market(market_name: str):
     except Exception:
         raise HTTPException(status_code=502, detail="Upstream error")
 
-    return {
-        "market": canonical,
-        "summary": summary,
-        "status": status,
-    }
+    # yfinance puts a tzinfo object under status["tz"], which JSON cannot encode.
+    return jsonable_encoder(
+        {
+            "market": canonical,
+            "summary": summary,
+            "status": status,
+        },
+        custom_encoder={tzinfo: lambda tz: tz.tzname(None)},
+    )

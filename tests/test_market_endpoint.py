@@ -5,7 +5,9 @@ instantiated when validation fails, and that upstream exceptions
 are sanitized as HTTP 502 without leaking internal details.
 """
 
+import json
 import unittest
+from datetime import datetime, timedelta, timezone
 from unittest.mock import patch, MagicMock
 
 from fastapi import HTTPException
@@ -29,6 +31,25 @@ class TestMarketEndpoint(unittest.IsolatedAsyncioTestCase):
         self.assertEqual(result["summary"], {"key": "value"})
         self.assertEqual(result["status"], {"open": True})
         mock_market_cls.assert_called_once_with("US")
+
+    @patch("yfinance_wrapper.api.yf.Market")
+    async def test_status_with_tzinfo_is_json_serializable(self, mock_market_cls):
+        mock_market = MagicMock()
+        mock_market.summary = {"^GSPC": {"regularMarketPrice": 1.0}}
+        mock_market.status = {
+            "status": "closed",
+            "open": datetime(2026, 10, 26, 13, 30, tzinfo=timezone.utc),
+            "timezone": {"short": "EDT", "$text": "America/New_York"},
+            "tz": timezone(timedelta(hours=-4), "EDT"),
+        }
+        mock_market_cls.return_value = mock_market
+
+        result = await get_market(market_name="US")
+
+        json.dumps(result)
+        self.assertEqual(result["status"]["tz"], "EDT")
+        self.assertEqual(result["status"]["open"], "2026-10-26T13:30:00+00:00")
+        self.assertEqual(result["status"]["status"], "closed")
 
     @patch("yfinance_wrapper.api.yf.Market")
     async def test_valid_lowercase_market_returns_envelope(self, mock_market_cls):

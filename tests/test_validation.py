@@ -79,9 +79,14 @@ class TestValidateDateRange(unittest.TestCase):
             validate_date_range(future, future)
         self.assertIn("future", str(ctx.exception).lower())
 
+    def test_exclusive_end_tomorrow_allowed(self):
+        today = date.today()
+        tomorrow = today + timedelta(days=1)
+        self.assertEqual(validate_date_range(today, tomorrow), (today, tomorrow))
+
     def test_future_end_raises_by_default(self):
         today = date.today()
-        future = today + timedelta(days=1)
+        future = today + timedelta(days=2)
         with self.assertRaises(ValueError) as ctx:
             validate_date_range(today, future)
         self.assertIn("future", str(ctx.exception).lower())
